@@ -85,16 +85,16 @@ public class ExcelTest {
 	public void benchmark() throws Exception {
 		RowConverter<Country> converter = (row) -> new Country((String) row[0], (String) row[1]);
 
-		LeitorPlanilha<Country> reader = LeitorPlanilha.builder(Country.class)
+		LeitorPlanilha<Country> leitor = LeitorPlanilha.builder(Country.class)
 				.converter(converter)
 				.delimitadorCsv(';')
 				.aba("Sheet1")
 				.comCabecalho()
 				.build();
 
-		delta(() -> reader.ler("src/test/resources/CountryCodes.xlsx"));
-		delta(() -> reader.ler("src/test/resources/CountryCodes.xls"));
-		delta(() -> reader.ler("src/test/resources/CountryCodes.csv"));
+		delta(() -> leitor.ler("src/test/resources/CountryCodes.xlsx"));
+		delta(() -> leitor.ler("src/test/resources/CountryCodes.xls"));
+		delta(() -> leitor.ler("src/test/resources/CountryCodes.csv"));
 	}
 
 	public void delta(Run c) throws Exception {

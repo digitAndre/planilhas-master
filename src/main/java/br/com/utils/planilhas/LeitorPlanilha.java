@@ -1,6 +1,7 @@
 package br.com.utils.planilhas;
 
 import au.com.bytecode.opencsv.CSVReader;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.poifs.filesystem.FileMagic;
 import org.apache.poi.ss.usermodel.*;
 
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+@Slf4j
 public class LeitorPlanilha<T> {
     public interface RowConverter<T> {
         T convert(Object[] row);
@@ -19,7 +21,7 @@ public class LeitorPlanilha<T> {
 
     public static class Builder<T> {
         private boolean possuiCabecalho;
-        private RowConverter<T> converter;
+        private RowConverter<T> conversor;
         private String aba;
 
         private char delimitador;
@@ -27,8 +29,8 @@ public class LeitorPlanilha<T> {
         public Builder() {
         }
 
-        public Builder<T> converter(RowConverter<T> converter) {
-            this.converter = converter;
+        public Builder<T> converter(RowConverter<T> conversor) {
+            this.conversor = conversor;
             return this;
         }
 
@@ -63,8 +65,8 @@ public class LeitorPlanilha<T> {
         this.info = info;
     }
 
-    public List<T> ler(String fileName) throws Exception {
-        try (FileInputStream is = new FileInputStream(fileName)) {
+    public List<T> ler(String nomeArquivo) throws Exception {
+        try (FileInputStream is = new FileInputStream(nomeArquivo)) {
             return ler(is);
         }
     }
@@ -79,8 +81,8 @@ public class LeitorPlanilha<T> {
 
     private List<T> lerExcel(InputStream is) throws Exception {
         Workbook workbook = WorkbookFactory.create(is);
-        Sheet sheet = workbook.getSheet(info.aba);
-        return extrairAba(sheet);
+        Sheet aba = workbook.getSheet(info.aba);
+        return extrairAba(aba);
     }
 
     private List<T> lerCsv(InputStream in, char delimitador, int qtdTentativas) throws Exception {
@@ -91,12 +93,14 @@ public class LeitorPlanilha<T> {
             List<String[]> allRows = cvsr.readAll();
             int start = info.possuiCabecalho ? 1 : 0;
             for (int i = start; i < allRows.size(); i++) {
-                T obj = info.converter.convert(allRows.get(i));
+                T obj = info.conversor.convert(allRows.get(i));
                 objList.add(obj);
             }
+
+            return objList;
         } catch(ArrayIndexOutOfBoundsException e){
             if(qtdTentativas >= 1) {
-                System.out.println("Não foi possível ler a planilha CSV com os delimitadores ; e ,");
+                log.error("Não foi possível ler a planilha CSV com os delimitadores ; e ,", e);
                 throw e;
             }
 
@@ -106,9 +110,8 @@ public class LeitorPlanilha<T> {
                 delimitador = ';';
 
             qtdTentativas = qtdTentativas + 1;
-            lerCsv(in, delimitador, qtdTentativas);
+            return lerCsv(in, delimitador, qtdTentativas);
         }
-        return objList;
     }
 
     private List<T> extrairAba(Sheet sheet) {
@@ -128,12 +131,12 @@ public class LeitorPlanilha<T> {
     private T extrairObjeto(Iterator<Row> rowIterator) {
         Row row = rowIterator.next();
         Iterator<Cell> cellIterator = row.cellIterator();
-        Object[] rowVals = new Object[row.getLastCellNum()];
+        Object[] valoresLinhas = new Object[row.getLastCellNum()];
         while (cellIterator.hasNext()) {
             Cell cell = cellIterator.next();
-            rowVals[cell.getColumnIndex()] = obterValorCelula(cell);
+            valoresLinhas[cell.getColumnIndex()] = obterValorCelula(cell);
         }
-        return info.converter.convert(rowVals);
+        return info.conversor.convert(valoresLinhas);
     }
 
     private boolean isExcel(InputStream is) throws Exception {
