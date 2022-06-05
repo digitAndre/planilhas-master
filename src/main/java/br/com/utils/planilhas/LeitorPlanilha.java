@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class ExcelReader<T> {
+public class LeitorPlanilha<T> {
     public interface RowConverter<T> {
         T convert(Object[] row);
     }
@@ -47,8 +47,8 @@ public class ExcelReader<T> {
             return this;
         }
 
-        public ExcelReader<T> build() {
-            return new ExcelReader<T>(this);
+        public LeitorPlanilha<T> build() {
+            return new LeitorPlanilha<T>(this);
         }
 
     }
@@ -59,17 +59,17 @@ public class ExcelReader<T> {
         return new Builder<T>();
     }
 
-    private ExcelReader(Builder<T> info) {
+    private LeitorPlanilha(Builder<T> info) {
         this.info = info;
     }
 
-    public List<T> read(String fileName) throws Exception {
+    public List<T> ler(String fileName) throws Exception {
         try (FileInputStream is = new FileInputStream(fileName)) {
-            return read(is);
+            return ler(is);
         }
     }
 
-    public List<T> read(InputStream is) throws Exception {
+    public List<T> ler(InputStream is) throws Exception {
         try (BufferedInputStream buf = new BufferedInputStream(is)) {
             if (isExcel(buf))
                 return lerExcel(buf);
@@ -131,7 +131,7 @@ public class ExcelReader<T> {
         Object[] rowVals = new Object[row.getLastCellNum()];
         while (cellIterator.hasNext()) {
             Cell cell = cellIterator.next();
-            rowVals[cell.getColumnIndex()] = getValue(cell);
+            rowVals[cell.getColumnIndex()] = obterValorCelula(cell);
         }
         return info.converter.convert(rowVals);
     }
@@ -141,7 +141,7 @@ public class ExcelReader<T> {
                 || FileMagic.valueOf(is) == FileMagic.OLE2; /* .xls */
     }
 
-    private Object getValue(Cell cell) {
+    private Object obterValorCelula(Cell cell) {
         switch (cell.getCellType()) {
             case Cell.CELL_TYPE_STRING:
                 return cell.getStringCellValue();

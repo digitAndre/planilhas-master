@@ -1,7 +1,7 @@
 package co.elron.excelr;
 
-import br.com.utils.planilhas.ExcelReader;
-import br.com.utils.planilhas.ExcelReader.RowConverter;
+import br.com.utils.planilhas.LeitorPlanilha;
+import br.com.utils.planilhas.LeitorPlanilha.RowConverter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,12 +26,12 @@ public class ExcelTest {
 		void run() throws Exception;
 	}
 
-	private ExcelReader<Country> reader;
+	private LeitorPlanilha<Country> reader;
 
 	@Before
 	public void setUp() {
 		RowConverter<Country> converter = (row) -> new Country((String) row[0], (String) row[1]);
-		reader = ExcelReader.builder(Country.class)
+		reader = LeitorPlanilha.builder(Country.class)
 				            .converter(converter)
 				            .comCabecalho()
 				            .delimitadorCsv(';')
@@ -42,28 +42,28 @@ public class ExcelTest {
 	@Test
 	public void shouldParseCorrectly_GivenXlsxFile() throws Exception {
 		List<Country> list;
-		list = reader.read("src/test/resources/CountryCodes.xlsx");
+		list = reader.ler("src/test/resources/CountryCodes.xlsx");
 		checkList(list);
 	}
 
 	@Test
 	public void shouldParseCorrectly_GivenXlsFile() throws Exception {
 		List<Country> list;
-		list = reader.read("src/test/resources/CountryCodes.xls");
+		list = reader.ler("src/test/resources/CountryCodes.xls");
 		checkList(list);
 	}
 
 	@Test
 	public void shouldParseCorrectly_GivenCsvFile() throws Exception {
 		List<Country> list;
-		list = reader.read("src/test/resources/CountryCodes.csv");
+		list = reader.ler("src/test/resources/CountryCodes.csv");
 		checkList(list);
 	}
 
 	@Test
 	public void shouldHandleNullValues_GivenANullCell() throws Exception {
 		List<Country> list;
-		list = reader.read("src/test/resources/CountryCodes.xls");
+		list = reader.ler("src/test/resources/CountryCodes.xls");
 		Country country = list.get(1);
 		assertNull(country.name);
 		assertEquals("ae", country.shortCode);
@@ -85,16 +85,16 @@ public class ExcelTest {
 	public void benchmark() throws Exception {
 		RowConverter<Country> converter = (row) -> new Country((String) row[0], (String) row[1]);
 
-		ExcelReader<Country> reader = ExcelReader.builder(Country.class)
+		LeitorPlanilha<Country> reader = LeitorPlanilha.builder(Country.class)
 				.converter(converter)
 				.delimitadorCsv(';')
 				.aba("Sheet1")
 				.comCabecalho()
 				.build();
 
-		delta(() -> reader.read("src/test/resources/CountryCodes.xlsx"));
-		delta(() -> reader.read("src/test/resources/CountryCodes.xls"));
-		delta(() -> reader.read("src/test/resources/CountryCodes.csv"));
+		delta(() -> reader.ler("src/test/resources/CountryCodes.xlsx"));
+		delta(() -> reader.ler("src/test/resources/CountryCodes.xls"));
+		delta(() -> reader.ler("src/test/resources/CountryCodes.csv"));
 	}
 
 	public void delta(Run c) throws Exception {

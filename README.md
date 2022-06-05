@@ -5,16 +5,16 @@ Foi baseada em outra lib excelr, porém com algumas modificações úteis nas re
 
 Examplo de uso:
 
-		RowConverter<Country> converter = (Object[] row) -> new Country((String)row[0], (String)row[1]);
-		
-		ExcelReader<Country> reader = ExcelReader.builder(Country.class)
-		     .converter(converter)
-		     .withHeader()
-		     .csvDelimiter(';')
-		     .sheets(1)
-		     .build();
+		RowConverter<Country> converter = (row) -> new Country((String) row[0], (String) row[1]);
+
+		LeitorPlanilha<Country> reader = LeitorPlanilha.builder(Country.class)
+				.converter(converter)
+				.delimitadorCsv(';')
+				.aba("Sheet1")
+				.comCabecalho()
+				.build();
 		
 		List<Country> list;
-		list = reader.read("src/test/resources/CountryCodes.xlsx");
-		list = reader.read("src/test/resources/CountryCodes.xls");
-		list = reader.read("src/test/resources/CountryCodes.csv");
+		list = reader.ler("src/test/resources/CountryCodes.xlsx");
+		list = reader.ler("src/test/resources/CountryCodes.xls");
+		list = reader.ler("src/test/resources/CountryCodes.csv");
