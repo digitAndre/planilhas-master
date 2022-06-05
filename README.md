@@ -1,5 +1,5 @@
 # Planilhas
-Utilidade básica em Java que faz a leitura de planilhas XLSX, XLS e CSV e converte as linhas para Objetos em Java.
+Biblioteca utilitária em Java que faz a leitura de planilhas XLSX, XLS e CSV e converte as linhas para Objetos.
 
 Foi baseada em outra lib excelr, porém com algumas modificações úteis nas regras de leitura.
 
